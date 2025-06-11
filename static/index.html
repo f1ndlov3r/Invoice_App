@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvoiceAnalytics Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a56db;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e429f;
+            --secondary: #16a34a;
+            --secondary-dark: #15803d;
+            --accent: #8b5cf6;
+            --accent-dark: #7c3aed;
+            --bg-light: #f3f4f6;
+            --bg-white: #ffffff;
+            --text-dark: #111827;
+            --text-medium: #374151;
+            --text-light: #6b7280;
+            --border-color: #e5e7eb;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-light); 
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 260px;
+            background: var(--bg-white);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+            transition: all 0.3s;
+            box-shadow: var(--shadow);
+        }
+        
+        .sidebar-header {
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .logo-icon {
+            width: 35px;
+            height: 35px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .logo-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            white-space: nowrap;
+        }
+        
+        .logo-text span {
+            color: var(--primary);
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .menu-item {
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-medium);
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .menu-item:hover {
+            background: var(--gray-50);
+            color: var(--primary);
+        }
+        
+        .menu-item.active {
+            color: var(--primary);
+            background: var(--gray-50);
+        }
+        
+        .menu-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--primary);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            transition: all 0.3s;
+        }
+        
+        .toggle-sidebar {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-medium);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+        }
+        
+        .toggle-sidebar:hover {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+        
+        header {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .content-area {
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: var(--bg-white);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .card-title i {
+            color: var(--primary);
+        }
+        
+        .tab-content { 
+            display: none; 
+        }
+        
+        .tab-content.active { 
+            display: block; 
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tabs { 
+            display: flex; 
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+        
+        .tab { 
+            padding: 0.75rem 1.5rem; 
+            cursor: pointer; 
+            font-weight: 500;
+            position: relative;
+            color: var(--text-medium);
+            transition: all 0.3s ease;
+        }
+        
+        .tab:hover {
+            color: var(--primary);
+        }
+        
+        .tab.active { 
+            color: var(--primary); 
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+        
+        .tab i {
+            margin-right: 0.5rem;
+        }
+        
+        input[type=file] { 
+            width: 100%; 
+            margin-bottom: 1.5rem;
+            padding: 0.75rem;
+            border: 1px dashed var(--border-color);
+            border-radius: 0.375rem;
+            background: #f9fafb;
+        }
+        
+        button { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 0.75rem 1.5rem; 
+            border-radius: 0.375rem; 
+            cursor: pointer; 
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: var(--primary-dark);
+        }
+        
+        button:disabled { 
+            background: var(--text-light); 
+            cursor: not-allowed;
+        }
+        
+        .results { 
+            margin-top: 2rem; 
+        }
+        
+        .result-item { 
+            background: var(--gray-50); 
+            margin-bottom: 1rem; 
+            padding: 1.25rem; 
+            border-radius: 0.5rem; 
+            border-left: 3px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .result-item-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .result-item-header i {
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+        
+        pre { 
+            background: #f8fafc; 
+            padding: 1rem; 
+            border-radius: 0.375rem; 
+            overflow-x: auto; 
+            font-size: 0.875rem;
+            margin-top: 0.75rem;
+            border: 1px solid var(--gray-200);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        
+        .note { 
+            background: #f0f9ff;
+            border-left: 3px solid #0ea5e9;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.375rem;
+        }
+        
+        .note ul {
+            margin-left: 1.5rem;
+        }
+        
+        .note li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .note li:last-child {
+            margin-bottom: 0;
+        }
+        
+        .note b {
+            color: var(--primary);
+        }
+        
+        .excel-data { 
+            margin-top: 2rem; 
+        }
+        
+        .table-container { 
+            overflow-x: auto;
+            box-shadow: var(--shadow-sm);
+            border-radius: 0.375rem;
+            border: 1px solid var(--border-color);
+            margin-top: 1.5rem;
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            overflow-x: auto; 
+            display: table;
+            font-size: 0.875rem;
+        }
+        
+        table th { 
+            background: var(--gray-50); 
+            padding: 0.75rem 1rem; 
+            text-align: left; 
+            font-weight: 500; 
+            color: var(--text-medium);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        table td { 
+            padding: 0.75rem 1rem; 
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+        
+        table tr:nth-child(even) {
+            background-color: var(--gray-50);
+        }
+        
+        table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        table tr:hover {
+            background: #f0f7ff;
+        }
+        
+        .status-message { 
+            text-align: center; 
+            margin: 1.5rem 0; 
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .status-loading {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+        
+        .status-success {
+            background: #f0fdf4;
+            color: #15803d;
+        }
+        
+        .status-error {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+        
+        .dashboard-container { 
+            margin-top: 1.5rem; 
+        }
+        
+        .dashboard-header { 
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem; 
+        }
+        
+        .metric-card { 
+            background: var(--bg-white); 
+            padding: 1.25rem; 
+            border-radius: 0.5rem; 
+            box-shadow: var(--shadow); 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 3px solid var(--primary);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .metric-card h3 { 
+            margin: 0; 
+            font-size: 0.813rem; 
+            color: var(--text-medium); 
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .metric-card .value { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            margin: 0.75rem 0 0.25rem; 
+            color: var(--primary);
+        }
+        
+        .metric-card .icon {
+            margin-bottom: 0.75rem;
+            background: #eff6ff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+        
+        .chart-row { 
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-container { 
+            background: var(--bg-white); 
+            border-radius: 0.5rem; 
+            box-shadow: var(--shadow);
+            height: 300px;
+            padding: 1.25rem;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+        
+        .chart-container h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .chart-container h3 i {
+            color: var(--primary);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+            
+            .main-content {
+                margin-left: 220px;
+            }
+            
+            .chart-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 260px;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .toggle-sidebar {
+                display: block;
+            }
+            
+            .dashboard-header {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .content-area {
+                padding: 1rem;
+            }
+        }
+        
+        /* Notification system */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.375rem;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            max-width: 400px;
+            font-size: 0.875rem;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: slideIn 0.3s forwards, fadeOut 0.3s 2.7s forwards;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+        }
+        
+        .notification-success {
+            background: #f0fdf4;
+            color: #15803d;
+            border-left: 3px solid #16a34a;
+        }
+        
+        .notification-error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border-left: 3px solid #dc2626;
+        }
+        
+        .notification-info {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-left: 3px solid #3b82f6;
+        }
+        
+        /* Loading animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Component Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--secondary-dark);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-medium);
+        }
+        
+        .btn-outline:hover {
+            background: var(--gray-50);
+            color: var(--primary);
+            border-color: var(--primary-light);
+        }
+        
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.813rem;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+        
+        .upload-area {
+            margin-bottom: 1.5rem;
+        }
+        
+        .file-input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        
+        .upload-zone {
+            border: 2px dashed var(--gray-300);
+            padding: 2rem;
+            text-align: center;
+            border-radius: 0.5rem;
+            background: var(--gray-50);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .upload-zone:hover {
+            border-color: var(--primary-light);
+            background: #f0f7ff;
+        }
+        
+        .upload-zone i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            margin-bottom: 0.5rem;
+            color: var(--text-medium);
+            font-size: 1rem;
+        }
+        
+        .upload-browse {
+            color: var(--primary);
+            font-weight: 500;
+            cursor: pointer;
+            margin-left: 0.25rem;
+        }
+        
+        .upload-browse:hover {
+            text-decoration: underline;
+        }
+        
+        .upload-hint {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+        
+        .file-list {
+            margin-bottom: 1.5rem;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--gray-50);
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .file-icon {
+            margin-right: 0.75rem;
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+        
+        .file-name {
+            flex: 1;
+            font-size: 0.875rem;
+            color: var(--text-medium);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .file-size {
+            margin-right: 1rem;
+            color: var(--gray-500);
+            font-size: 0.813rem;
+        }
+        
+        .file-remove {
+            background: none;
+            border: none;
+            color: var(--gray-500);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+        
+        .file-remove:hover {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <div class="logo-text">Invoice<span>Analytics</span></div>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item active" data-tab="upload">
+                    <i class="fas fa-upload"></i>
+                    <span>Upload Hóa Đơn</span>
+                </div>
+                <div class="menu-item" data-tab="excel">
+                    <i class="fas fa-table"></i>
+                    <span>Bảng dữ liệu</span>
+                </div>
+                <div class="menu-item" data-tab="dashboard">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Dashboard</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content" id="main-content">
+            <header>
+                <button class="toggle-sidebar" id="toggle-sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="header-title">
+                    <span id="current-page-title">Upload Hóa Đơn</span>
+                </div>
+            </header>
+            
+            <div class="content-area">
+                <div class="tab-content active" id="upload-tab">
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-info-circle"></i> Hướng dẫn sử dụng
+                        </div>
+                        <div class="note">
+                            <ul>
+                                <li>Bạn có thể <b>chọn nhiều ảnh hóa đơn</b> cùng lúc để upload và xử lý hàng loạt.</li>
+                                <li>Kết quả sẽ hiển thị bên dưới và <b>tự động lưu vào file <code>text.txt</code> trên server</b>.</li>
+                                <li>Dữ liệu đã được chuẩn hóa sẽ tự động xuất ra file <code>output.xlsx</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-upload"></i> Upload và xử lý hóa đơn
+                        </div>
+                        <form id="upload-form">
+                            <div class="upload-area">
+                                <input type="file" id="file-input" name="files" multiple accept="image/*" class="file-input">
+                                <div class="upload-zone">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <div class="upload-text">
+                                        <span>Kéo & thả ảnh hóa đơn hoặc</span>
+                                        <label for="file-input" class="upload-browse">Chọn file</label>
+                                    </div>
+                                    <p class="upload-hint">Hỗ trợ: JPG, PNG, GIF</p>
+                                </div>
+                            </div>
+                            <div class="file-list" id="file-list"></div>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-cogs"></i> Phân tích hóa đơn</button>
+                        </form>
+                    </div>
+                    
+                    <div class="results" id="results"></div>
+                </div>
+                
+                <div class="tab-content" id="excel-tab">
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-table"></i> Dữ liệu đã chuẩn hóa từ file Excel
+                        </div>
+                        <button id="load-excel-btn" class="btn btn-primary"><i class="fas fa-sync-alt"></i> Tải dữ liệu Excel</button>
+                        <div id="excel-status" class="status-message"></div>
+                        <div class="table-container">
+                            <table id="excel-table">
+                                <thead>
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Mã tạo đơn</th>
+                                        <th>Ngày tạo đơn</th>
+                                        <th>Tên khách hàng</th>
+                                        <th>Tên mặt hàng</th>
+                                        <th>Đơn vị tính</th>
+                                        <th>Số lượng</th>
+                                        <th>Đơn giá</th>
+                                        <th>Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="dashboard-tab">
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fas fa-chart-line"></i> Dashboard Hoạt Động Kinh Doanh
+                        </div>
+                        <button id="load-dashboard-btn" class="btn btn-primary"><i class="fas fa-sync-alt"></i> Tải dữ liệu Dashboard</button>
+                        <div id="dashboard-status" class="status-message"></div>
+                    </div>
+                    
+                    <div class="dashboard-container">
+                        <div class="dashboard-header">
+                            <div class="metric-card">
+                                <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
+                                <h3>Tổng doanh thu</h3>
+                                <div class="value" id="total-revenue">0</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="icon"><i class="fas fa-shopping-cart"></i></div>
+                                <h3>Tổng số đơn hàng</h3>
+                                <div class="value" id="total-orders">0</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="icon"><i class="fas fa-users"></i></div>
+                                <h3>Tổng số khách hàng</h3>
+                                <div class="value" id="total-customers">0</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="icon"><i class="fas fa-calculator"></i></div>
+                                <h3>Giá trị đơn hàng TB</h3>
+                                <div class="value" id="avg-order-value">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-row">
+                            <div class="chart-box">
+                                <div class="chart-container">
+                                    <h3><i class="fas fa-user-tag"></i> Doanh thu theo Khách hàng</h3>
+                                    <canvas id="chart-revenue-by-customer"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-box">
+                                <div class="chart-container">
+                                    <h3><i class="fas fa-box"></i> Doanh thu theo Sản phẩm</h3>
+                                    <canvas id="chart-revenue-by-product"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-row">
+                            <div class="chart-box">
+                                <div class="chart-container">
+                                    <h3><i class="fas fa-calendar"></i> Doanh thu theo Tháng</h3>
+                                    <canvas id="chart-revenue-by-month"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-box">
+                                <div class="chart-container">
+                                    <h3><i class="fas fa-cube"></i> Số lượng bán theo Sản phẩm</h3>
+                                    <canvas id="chart-quantity-by-product"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-row">
+                            <div class="chart-box">
+                                <div class="chart-container">
+                                    <h3><i class="fas fa-user-friends"></i> Số đơn hàng theo Khách hàng</h3>
+                                    <canvas id="chart-orders-by-customer"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-box">
+                                <div class="chart-container">
+                                    <h3><i class="fas fa-chart-pie"></i> Cơ cấu Doanh thu theo Sản phẩm</h3>
+                                    <canvas id="chart-revenue-share-by-product"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Sidebar & Tab Navigation
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebar = document.getElementById('toggle-sidebar');
+        const mainContent = document.getElementById('main-content');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const currentPageTitle = document.getElementById('current-page-title');
+        
+        // Toggle sidebar on mobile
+        toggleSidebar.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+        
+        // Tab navigation
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // Update active menu item
+                menuItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Update page title
+                currentPageTitle.textContent = item.querySelector('span').textContent;
+                
+                // Show corresponding tab content
+                const tabId = item.getAttribute('data-tab');
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+                
+                // Close sidebar on mobile after selection
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+        
+        // File Upload Handling
+        const form = document.getElementById('upload-form');
+        const fileInput = document.getElementById('file-input');
+        const fileList = document.getElementById('file-list');
+        const resultsDiv = document.getElementById('results');
+        const uploadZone = document.querySelector('.upload-zone');
+        
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            uploadZone.classList.add('highlight');
+        }
+        
+        function unhighlight() {
+            uploadZone.classList.remove('highlight');
+        }
+        
+        uploadZone.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            updateFileList();
+        }
+        
+        // Update file list when files are selected
+        fileInput.addEventListener('change', updateFileList);
+        
+        function updateFileList() {
+            fileList.innerHTML = '';
+            
+            if (fileInput.files.length > 0) {
+                Array.from(fileInput.files).forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    
+                    const fileExt = file.name.split('.').pop().toLowerCase();
+                    let fileIconClass = 'fa-file';
+                    
+                    if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(fileExt)) {
+                        fileIconClass = 'fa-file-image';
+                    }
+                    
+                    fileItem.innerHTML = `
+                        <i class="fas ${fileIconClass} file-icon"></i>
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                        <button type="button" class="file-remove" data-index="${index}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    fileList.appendChild(fileItem);
+                });
+                
+                // Add event listeners to remove buttons
+                document.querySelectorAll('.file-remove').forEach(button => {
+                    button.addEventListener('click', function() {
+                        removeFile(parseInt(this.getAttribute('data-index')));
+                    });
+                });
+            }
+        }
+        
+        function removeFile(index) {
+            const dt = new DataTransfer();
+            const files = fileInput.files;
+            
+            for (let i = 0; i < files.length; i++) {
+                if (i !== index) {
+                    dt.items.add(files[i]);
+                }
+            }
+            
+            fileInput.files = dt.files;
+            updateFileList();
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Form submission
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const files = fileInput.files;
+            if (!files.length) {
+                showNotification('Vui lòng chọn ít nhất một ảnh hóa đơn.', 'error');
+                return;
+            }
+            
+            // Create loading indicator
+            resultsDiv.innerHTML = `
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-spinner fa-spin"></i> Đang xử lý hóa đơn
+                    </div>
+                    <div class="status-message status-loading">
+                        <div class="loading-spinner"></div>
+                        <span>Hệ thống đang phân tích dữ liệu từ hóa đơn. Vui lòng đợi...</span>
+                    </div>
+                </div>
+            `;
+            
+            const formData = new FormData();
+            for (let file of files) {
+                formData.append('files', file);
+            }
+            
+            try {
+                const response = await fetch('/process_images/', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                resultsDiv.innerHTML = '';
+                
+                if (data.results && data.results.length) {
+                    resultsDiv.innerHTML = `
+                        <div class="card">
+                            <div class="card-title">
+                                <i class="fas fa-check-circle"></i> Kết quả xử lý (${data.results.length} hóa đơn)
+                            </div>
+                        </div>
+                    `;
+                    
+                    data.results.forEach(item => {
+                        const resultCard = document.createElement('div');
+                        resultCard.className = 'result-item';
+                        
+                        let headerContent = `
+                            <div class="result-item-header">
+                                <i class="fas fa-file-alt"></i>
+                                <strong>${item.filename}</strong>
+                            </div>
+                        `;
+                        
+                        let bodyContent = '';
+                        if (item.result) {
+                            bodyContent += `<pre>${item.result}</pre>`;
+                            if (item.excel_status) {
+                                bodyContent += `<p style="color:#15803d; margin-top:0.75rem;"><i class="fas fa-check-circle"></i> ${item.excel_status}</p>`;
+                            }
+                        } else {
+                            bodyContent += `<div class="status-message status-error"><i class="fas fa-exclamation-triangle"></i> Lỗi: ${item.error}</div>`;
+                        }
+                        
+                        resultCard.innerHTML = headerContent + bodyContent;
+                        resultsDiv.appendChild(resultCard);
+                    });
+                    
+                    showNotification('Xử lý hóa đơn thành công!', 'success');
+                    
+                    // Clear file input after successful processing
+                    fileInput.value = '';
+                    fileList.innerHTML = '';
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="status-message status-error">
+                            <i class="fas fa-exclamation-triangle"></i> Không có kết quả trả về.
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="status-message status-error">
+                        <i class="fas fa-exclamation-triangle"></i> Lỗi khi xử lý: ${error.message}
+                    </div>
+                `;
+            }
+        };
+        
+        // Excel data loading
+        const loadExcelBtn = document.getElementById('load-excel-btn');
+        const excelTable = document.getElementById('excel-table');
+        const excelStatus = document.getElementById('excel-status');
+        
+        loadExcelBtn.addEventListener('click', async () => {
+            excelStatus.innerHTML = '<div class="loading-spinner"></div> Đang tải dữ liệu...';
+            excelStatus.className = 'status-message status-loading';
+            
+            try {
+                const response = await fetch('/excel-data/');
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    const tbody = excelTable.querySelector('tbody');
+                    tbody.innerHTML = '';
+                    
+                    data.data.forEach(row => {
+                        const tr = document.createElement('tr');
+                        
+                        tr.innerHTML = `
+                            <td>${row.STT || ''}</td>
+                            <td>${row['Mã tạo đơn'] || ''}</td>
+                            <td>${row['Ngày tạo đơn'] || ''}</td>
+                            <td>${row['Tên khách hàng'] || ''}</td>
+                            <td>${row['Tên mặt hàng'] || ''}</td>
+                            <td>${row['Đơn vị tính'] || ''}</td>
+                            <td>${row['Số lượng'] || ''}</td>
+                            <td>${formatCurrency(row['Đơn giá']) || ''}</td>
+                            <td>${formatCurrency(row['Thành tiền']) || ''}</td>
+                        `;
+                        
+                        tbody.appendChild(tr);
+                    });
+                    
+                    excelStatus.innerHTML = `<i class="fas fa-check-circle"></i> Đã tải ${data.data.length} dòng dữ liệu từ file Excel`;
+                    excelStatus.className = 'status-message status-success';
+                    
+                    showNotification(`Đã tải ${data.data.length} dòng dữ liệu từ file Excel`, 'success');
+                } else {
+                    excelStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${data.message || 'Không có dữ liệu để hiển thị'}`;
+                    excelStatus.className = 'status-message status-error';
+                }
+            } catch (error) {
+                excelStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Lỗi: ${error.message}`;
+                excelStatus.className = 'status-message status-error';
+            }
+        });
+        
+        // Dashboard data loading
+        const loadDashboardBtn = document.getElementById('load-dashboard-btn');
+        const dashboardStatus = document.getElementById('dashboard-status');
+        
+        const formatCurrency = (value) => {
+            if (!value && value !== 0) return '';
+            return new Intl.NumberFormat('vi-VN', { 
+                style: 'currency', 
+                currency: 'VND',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value).replace('₫', 'VNĐ');
+        };
+        
+        const createChart = (id, type, labels, data, colors = null) => {
+            const ctx = document.getElementById(id).getContext('2d');
+            
+            if (!colors) {
+                colors = labels.map(() => 
+                    `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.7)`
+                );
+            }
+            
+            return new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: id.split('-').slice(1).join(' '),
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: colors.map(color => color.replace('0.7', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: type === 'pie' ? 'right' : 'top',
+                            display: type === 'pie'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== undefined) {
+                                        label += formatCurrency(context.parsed.y);
+                                    } else if (context.parsed !== undefined) {
+                                        label += formatCurrency(context.parsed);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        };
+        
+        let charts = {};
+        
+        loadDashboardBtn.addEventListener('click', async () => {
+            dashboardStatus.innerHTML = '<div class="loading-spinner"></div> Đang tải dữ liệu...';
+            dashboardStatus.className = 'status-message status-loading';
+            
+            try {
+                const response = await fetch('/dashboard-data/');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const stats = data.data;
+                    
+                    document.getElementById('total-revenue').textContent = formatCurrency(stats.total_revenue);
+                    document.getElementById('total-orders').textContent = stats.total_orders;
+                    document.getElementById('total-customers').textContent = stats.total_customers;
+                    document.getElementById('avg-order-value').textContent = formatCurrency(stats.avg_order_value);
+                    
+                    const chartColors = [
+                        'rgba(26, 86, 219, 0.7)',
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(22, 163, 74, 0.7)',
+                        'rgba(21, 128, 61, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(217, 119, 6, 0.7)',
+                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(185, 28, 28, 0.7)',
+                        'rgba(139, 92, 246, 0.7)',
+                        'rgba(91, 33, 182, 0.7)'
+                    ];
+                    
+                    // Customer Revenue Chart
+                    if (charts['chart-revenue-by-customer']) charts['chart-revenue-by-customer'].destroy();
+                    const customerLabels = stats.revenue_by_customer.map(item => item['Tên khách hàng']);
+                    const customerData = stats.revenue_by_customer.map(item => item['Thành tiền']);
+                    charts['chart-revenue-by-customer'] = createChart('chart-revenue-by-customer', 'bar', customerLabels, customerData, chartColors);
+                    
+                    // Product Revenue Chart
+                    if (charts['chart-revenue-by-product']) charts['chart-revenue-by-product'].destroy();
+                    const productLabels = stats.revenue_by_product.map(item => item['Tên mặt hàng']);
+                    const productData = stats.revenue_by_product.map(item => item['Thành tiền']);
+                    charts['chart-revenue-by-product'] = createChart('chart-revenue-by-product', 'bar', productLabels, productData, chartColors);
+                    
+                    // Monthly Revenue Chart
+                    if (charts['chart-revenue-by-month']) charts['chart-revenue-by-month'].destroy();
+                    const monthLabels = stats.revenue_by_month.map(item => item['Tháng']);
+                    const monthData = stats.revenue_by_month.map(item => item['Thành tiền']);
+                    charts['chart-revenue-by-month'] = createChart('chart-revenue-by-month', 'line', monthLabels, monthData, ['rgba(26, 86, 219, 0.7)']);
+                    
+                    // Product Quantity Chart
+                    if (charts['chart-quantity-by-product']) charts['chart-quantity-by-product'].destroy();
+                    const quantityLabels = stats.quantity_by_product.map(item => item['Tên mặt hàng']);
+                    const quantityData = stats.quantity_by_product.map(item => item['Số lượng']);
+                    charts['chart-quantity-by-product'] = createChart('chart-quantity-by-product', 'bar', quantityLabels, quantityData, chartColors);
+                    
+                    // Customer Orders Chart
+                    if (charts['chart-orders-by-customer']) charts['chart-orders-by-customer'].destroy();
+                    const orderCustomerLabels = stats.orders_by_customer.map(item => item['Tên khách hàng']);
+                    const orderCustomerData = stats.orders_by_customer.map(item => item['Số đơn hàng']);
+                    charts['chart-orders-by-customer'] = createChart('chart-orders-by-customer', 'bar', orderCustomerLabels, orderCustomerData, chartColors);
+                    
+                    // Product Revenue Pie Chart
+                    if (charts['chart-revenue-share-by-product']) charts['chart-revenue-share-by-product'].destroy();
+                    const pieLabels = stats.revenue_by_product.map(item => item['Tên mặt hàng']);
+                    const pieData = stats.revenue_by_product.map(item => item['Thành tiền']);
+                    charts['chart-revenue-share-by-product'] = createChart('chart-revenue-share-by-product', 'pie', pieLabels, pieData, chartColors);
+                    
+                    dashboardStatus.innerHTML = '<i class="fas fa-check-circle"></i> Đã tải dữ liệu Dashboard thành công';
+                    dashboardStatus.className = 'status-message status-success';
+                    
+                    showNotification('Đã tải dữ liệu Dashboard thành công', 'success');
+                } else {
+                    dashboardStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${data.message || 'Không có dữ liệu để hiển thị'}`;
+                    dashboardStatus.className = 'status-message status-error';
+                }
+            } catch (error) {
+                dashboardStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Lỗi: ${error.message}`;
+                dashboardStatus.className = 'status-message status-error';
+            }
+        });
+        
+        // Notification system
+        function showNotification(message, type = 'info') {
+            if (document.querySelector('.notification')) {
+                document.querySelector('.notification').remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            
+            let icon;
+            switch(type) {
+                case 'success':
+                    icon = 'check-circle';
+                    break;
+                case 'error':
+                    icon = 'exclamation-triangle';
+                    break;
+                default:
+                    icon = 'info-circle';
+            }
+            
+            notification.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Initialize on the first tab
+        document.querySelector('.menu-item.active').click();
+    </script>
+</body>
+</html> 
