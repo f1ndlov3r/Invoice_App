@@ -68,6 +68,10 @@ def extract_data_to_excel():
             return False
     return False
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse("static/favicon.ico")
+
 @app.get("/", response_class=HTMLResponse)
 def main(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
